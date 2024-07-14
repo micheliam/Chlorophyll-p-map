@@ -1,0 +1,92 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+import xarray as xr
+import numpy as np
+import scipy as sp
+
+
+Path = "/home/michelia.waibowo/labspaces/curacao-reef-mapping/data/raw/transects/transect_083/"
+
+file1 = xr.open_dataset(Path + "transect.nc")
+
+
+#to see dimension
+num_pixel=file1.sizes["X"] * file1.sizes["Y"]
+num_pixel
+
+import matplotlib.pyplot as plt
+import scipy.signal
+from scipy.signal import savgol_filter
+from scipy import signal
+
+w = file1.W
+c = file1.cube
+p = file1.par
+
+
+cx = file1.cube.X
+cy = file1.cube.Y
+cw = file1.cube.W
+
+
+cw1= file1.cube.W.data
+
+W1=c.W.data
+
+
+#calculating chl-a in 1 pixel
+Pder = np.zeros((1,1,400)) 
+for x in range (0, 1):
+    for y in range (0, 1):
+        P = c.data[y,x]
+        Pder[y,x] = signal.savgol_filter(P, window_length=9, polyorder=3, deriv=2)
+
+
+P = c.data[1,1]
+Pder = signal.savgol_filter(P, window_length=9, polyorder=3, deriv=2)
+
+
+#plotting spectral reflectance 
+plt.plot(c.W.data,Pder)
+ax = plt.gca() 
+ax.set_xlabel("Wavelength, nm")
+ax.set_ylabel("Reflectance")
+
+#getting value at 675 nm
+
+Pder[275]
+
+
+#calculating second derivative on Y=0-2000 X=0-640
+Pder = np.zeros((2000,640,400)) 
+for y in range (0, 2000):
+    for x in range (0, 640):
+        P = c.data[y,x]
+        Pder[y,x] = signal.savgol_filter(P, window_length=9, polyorder=3, deriv=2)
+        plt.show()
+
+
+#checking Pder dimension
+Pder.shape
+
+#filtering 675nm only
+m = Pder[:,:,275]
+
+#checking dimension
+m.shape
+
+#plot
+m = Pder[:,:,275]
+plt.imshow(m, cmap ='Greens_r')
+
+
+#notes: available color for plot :Accent, Accent_r, Blues, Blues_r, BrBG, BrBG_r, BuGn, BuGn_r, BuPu, BuPu_r, CMRmap, CMRmap_r, Dark2, Dark2_r, GnBu, GnBu_r, Greens, Greens_r, Greys, Greys_r, OrRd, OrRd_r, Oranges, Oranges_r, PRGn, PRGn_r, Paired, Paired_r, Pastel1, Pastel1_r, Pastel2, Pastel2_r, PiYG, PiYG_r, PuBu, PuBuGn, PuBuGn_r, PuBu_r, PuOr, PuOr_r, PuRd, PuRd_r, Purples, Purples_r, RdBu, RdBu_r, RdGy, RdGy_r, RdPu, RdPu_r, RdYlBu, RdYlBu_r, RdYlGn, RdYlGn_r, Reds, Reds_r, Set1, Set1_r, Set2, Set2_r, Set3, Set3_r, Spectral, Spectral_r, Wistia, Wistia_r, YlGn, YlGnBu, YlGnBu_r, YlGn_r, YlOrBr, YlOrBr_r, YlOrRd, YlOrRd_r, afmhot, afmhot_r, autumn, autumn_r, binary, binary_r, bone, bone_r, brg, brg_r, bwr, bwr_r, cividis, cividis_r, cool, cool_r, coolwarm, coolwarm_r, copper, copper_r, cubehelix, cubehelix_r, flag, flag_r, gist_earth, gist_earth_r, gist_gray, gist_gray_r, gist_heat, gist_heat_r, gist_ncar, gist_ncar_r, gist_rainbow, gist_rainbow_r, gist_stern, gist_stern_r, gist_yarg, gist_yarg_r, gnuplot, gnuplot2, gnuplot2_r, gnuplot_r, gray, gray_r, hot, hot_r, hsv, hsv_r, inferno, inferno_r, jet, jet_r, magma, magma_r, nipy_spectral, nipy_spectral_r, ocean, ocean_r, pink, pink_r, plasma, plasma_r, prism, prism_r, rainbow, rainbow_r, seismic, seismic_r, spring, spring_r, summer, summer_r, tab10, tab10_r, tab20, tab20_r, tab20b, tab20b_r, tab20c, tab20c_r, terrain, terrain_r, viridis, viridis_r, winter, winter_r
+
+
+m.size
+
+
+
+
+
